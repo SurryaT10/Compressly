@@ -1,5 +1,5 @@
 <h1>Compressly: Optimize Your Image Colors and Size</h1>
-Compressly is a tool designed to reduce the size of your images by compressing their color palettes using the K-Means Clustering algorithm. This project focuses on optimizing PNG files, reducing the number of unique colors while maintaining visual quality, making it ideal for image compression and storage.
+Compressly is a tool designed to reduce the size of your images by compressing their color palettes using the K-Means Clustering algorithm. This project focuses on optimizing images, reducing the number of unique colors while maintaining visual quality, making it ideal for image compression and storage.
 
 <h3>Key Features:</h3>
 <ul>
