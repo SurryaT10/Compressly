@@ -70,6 +70,29 @@ function Main() {
         }
     }
 
+    const downloadCompressedImage = () => {
+        if (!compressedImage) return;
+
+        // Extract base64 content
+        const base64Data = compressedImage.split(",")[1];
+        const byteCharacters = atob(base64Data); // Decode base64 string
+        const byteNumbers = new Array(byteCharacters.length).map((_, i) => byteCharacters.charCodeAt(i));
+        const byteArray = new Uint8Array(byteNumbers);
+
+        // Create Blob and Object URL
+        const blob = new Blob([byteArray], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor and trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "compressed_image.png";
+        a.click();
+
+        // Revoke the object URL after download
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div  onClick={() => showModal(false)} className="main">
             <h1 style={{marginTop:"1em"}}>Image Compresser</h1>
@@ -110,7 +133,7 @@ function Main() {
 
             {
                 previewImage ? (
-                    <div ref={bottomRef} className="image-container">
+                    <div className="image-container">
                         <div className="preview-container">
                             <h3>Original Image</h3>
                             <img className="preview-image" src={previewImage} alt="original-image" />
@@ -132,14 +155,23 @@ function Main() {
             }
 
             {
-                previewImage ? (
-                    <input className="button" type="button" 
-                        onClick={(event) => {
-                            event.stopPropagation(); // Prevent event from bubbling to parent
-                            showModal(true)
-                        }
-                    } value="Compare" />
-                ) : null
+                    <div ref={bottomRef} className="button-container">
+                        <button className="button"
+                            style={!compressedImage ? {opacity: "0"} : null}
+                            onClick={
+                                (event) => {
+                                    event.stopPropagation(); // Prevent event from bubbling to parent
+                                    showModal(true)
+                                }
+                            }>
+                            Compare
+                        </button>
+                        <button className="button"
+                            style={!compressedImage ? {opacity: "0"} : null}
+                            onClick={downloadCompressedImage}>
+                            Download
+                        </button>
+                    </div>
             }
 
             { modal && metrics ? 

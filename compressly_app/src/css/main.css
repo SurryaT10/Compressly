@@ -1,4 +1,6 @@
 .main {
+    margin-top: 60px;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,6 +81,8 @@
     border-radius: 5px;
     cursor: pointer;
     padding: 1em 2em;
+    margin: 0 1em;
+    margin-bottom: 2em;
 }
 
 .button:hover {
