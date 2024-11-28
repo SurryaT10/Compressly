@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import Comparison from './Comparison';
 import Modal from './Modal';
+import About from './About';
 import { FaRegImage } from "react-icons/fa6";
 import '../css/main.css';
 
-function Main() {
+function Main({ showAboutModal, onCloseModal }) {
     const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [compressedImage, setCompressedImage] = useState(null);
@@ -94,7 +95,10 @@ function Main() {
     };
 
     return (
-        <div  onClick={() => showModal(false)} className="main">
+        <div  onClick={() => {
+            showModal(false);
+            onCloseModal();
+        }} className="main">
             <h1 style={{marginTop:"1em"}}>Image Compresser</h1>
             <div className="container">
                 <input type="file" id="file-input" onChange={handleFileChange} />
@@ -177,6 +181,12 @@ function Main() {
             { modal && metrics ? 
                 <Modal>
                     <Comparison metrics={metrics} />
+                </Modal> : null
+            }
+
+            { showAboutModal ? 
+                <Modal>
+                    <About />
                 </Modal> : null
             }
         </div>
