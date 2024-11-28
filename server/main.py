@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi import Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image
@@ -24,14 +25,15 @@ def read_root():
     return "Welcome to Compressly"
 
 @app.post("/upload")
-async def uploadImage(file: UploadFile = File(...)):
+@app.post("/upload/")
+async def uploadImage(file: UploadFile = File(...), colors: int = Form(16)):
     try:
         # Read uploaded file
         image_data = await file.read()
         # Convert image bytes to a PIL Image
         original_image = Image.open(io.BytesIO(image_data))
         
-        model = Model(16)
+        model = Model(colors)
         compressed_image = model.generateCompressedImage(np.array(original_image))
         
         # Convert NumPy array to a PIL Image
