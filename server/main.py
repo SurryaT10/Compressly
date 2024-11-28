@@ -34,7 +34,7 @@ async def uploadImage(file: UploadFile = File(...), colors: int = Form(16)):
         original_image = Image.open(io.BytesIO(image_data))
         
         model = Model(colors)
-        compressed_image = model.generateCompressedImage(np.array(original_image))
+        compressed_image, centroids = model.generateCompressedImage(np.array(original_image))
         
         # Convert NumPy array to a PIL Image
         new_image = Image.fromarray(compressed_image)
@@ -53,7 +53,8 @@ async def uploadImage(file: UploadFile = File(...), colors: int = Form(16)):
         # Return response
         return JSONResponse({
             "compressed_image": f"data:image/png;base64,{base64_image}",
-            "metrics": metrics
+            "metrics": metrics,
+            "centroids": centroids.tolist()
         })
     except Exception as e:
         return {"error": str(e)}

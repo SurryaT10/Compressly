@@ -20,7 +20,7 @@ class Model:
         
         new_image = new_image.reshape(image.shape[0],image.shape[1],3)
         
-        return new_image
+        return new_image, mean_colors
     
     def calculate_metrics(self, original_image, compressed_image):
         # Count unique colors

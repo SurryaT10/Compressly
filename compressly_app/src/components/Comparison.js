@@ -1,6 +1,9 @@
+import ClusterGraph from './ClusterGraph';
+
 function Comparison(props) {
     return (
         <div className="comparison-table">
+          {props.centroids && <ClusterGraph centroids={props.centroids} />}
             <h2>Comparison Metrics</h2>
           <table border="1" style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>

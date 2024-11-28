@@ -13,6 +13,7 @@ function Main({ showAboutModal, onCloseModal }) {
     const [modal, showModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [colorCountIndex, setColorCountIndex] = useState(3);
+    const [centroids, setCentroids] = useState(null);
 
     const bottomRef = useRef(null); // Ref for scrolling
     const allowedValues = [2, 4, 8, 16, 32, 64, 128, 256];
@@ -65,6 +66,7 @@ function Main({ showAboutModal, onCloseModal }) {
                     "size_reduction": size_reduction,
                 }
                 setMetrics(data.metrics);
+                setCentroids(data.centroids);
             }
         } catch (error) {
             console.error("Error uploading image:", error);
@@ -180,7 +182,7 @@ function Main({ showAboutModal, onCloseModal }) {
 
             { modal && metrics ? 
                 <Modal>
-                    <Comparison metrics={metrics} />
+                    <Comparison centroids={centroids} metrics={metrics} />
                 </Modal> : null
             }
 
