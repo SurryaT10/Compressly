@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: compressly-frontend
+    env: static
+    buildCommand: "npm install && npm run build"
+    startCommand: "serve -s build"
+    plan: free
+    rootDir: .
+    regions:
+      - "us"
+    envVars:
+      - key: REACT_APP_API_URL
+        value: "http://compressly-backend.onrender.com"  # Replace with your FastAPI API URL
