@@ -1,5 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi import Form
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image
@@ -26,21 +25,28 @@ def read_root():
 
 @app.post("/upload")
 @app.post("/upload/")
-async def uploadImage(file: UploadFile = File(...), colors: int = Form(16)):
+async def uploadImage(file: UploadFile = File(...), colors: int = Form(8)):
     try:
         # Read uploaded file
         image_data = await file.read()
         # Convert image bytes to a PIL Image
         original_image = Image.open(io.BytesIO(image_data))
         
+        # Ensure image is in RGB mode
+        # Convert all images to RGB (handle different modes)
+        if original_image.mode not in ("RGB", "RGBA", "L"):
+            raise HTTPException(status_code=400, detail="Unsupported image mode.")
+        else:
+            original_image = original_image.convert("RGB")
+        
         model = Model(colors)
         compressed_image, centroids = model.generateCompressedImage(np.array(original_image))
-        
+                
         # Convert NumPy array to a PIL Image
         new_image = Image.fromarray(compressed_image)
 
         # Convert to indexed color palette
-        new_image = new_image.convert("P", palette=Image.ADAPTIVE, colors=16)
+        new_image = new_image.convert("P", palette=Image.ADAPTIVE, colors=colors)
 
         # Optimize and save as PNG
         buffer = io.BytesIO()
@@ -56,5 +62,9 @@ async def uploadImage(file: UploadFile = File(...), colors: int = Form(16)):
             "metrics": metrics,
             "centroids": centroids.tolist()
         })
+    except HTTPException as e:
+        # Re-raise HTTP exceptions
+        raise e
     except Exception as e:
+        print(f"Error during uploadImage: {e}")
         return {"error": str(e)}

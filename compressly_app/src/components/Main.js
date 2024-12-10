@@ -12,7 +12,7 @@ function Main({ showAboutModal, onCloseModal }) {
     const [metrics, setMetrics] = useState(null);
     const [modal, showModal] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [colorCountIndex, setColorCountIndex] = useState(3);
+    const [colorCountIndex, setColorCountIndex] = useState(2);
     const [centroids, setCentroids] = useState(null);
 
     const bottomRef = useRef(null); // Ref for scrolling
@@ -46,7 +46,7 @@ function Main({ showAboutModal, onCloseModal }) {
         formData.append("colors", colors);
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/upload", {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/upload`, {
                 method: "POST",
                 body: formData,
             });
