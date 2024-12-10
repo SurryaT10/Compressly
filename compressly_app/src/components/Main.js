@@ -46,7 +46,7 @@ function Main({ showAboutModal, onCloseModal }) {
         formData.append("colors", colors);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/upload`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}upload`, {
                 method: "POST",
                 body: formData,
             });
