@@ -9,11 +9,15 @@ from Model import Model
 
 app = FastAPI()
 
+# List of allowed origins
+origins = [
+    "https://compressly-frontend.onrender.com",  # Your frontend domain
+]
 
 # Allow CORS for React Frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
