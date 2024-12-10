@@ -50,6 +50,7 @@ function Main({ showAboutModal, onCloseModal }) {
                 method: "POST",
                 body: formData,
             });
+            console.log(response);
             const data = await response.json();
             if (data.compressed_image) {
                 const base64String = data.compressed_image.split(",")[1]; // Remove "data:image/png;base64,"
