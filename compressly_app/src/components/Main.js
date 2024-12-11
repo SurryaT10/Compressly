@@ -14,6 +14,7 @@ function Main({ showAboutModal, onCloseModal }) {
     const [loading, setLoading] = useState(false);
     const [colorCountIndex, setColorCountIndex] = useState(2);
     const [centroids, setCentroids] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const bottomRef = useRef(null); // Ref for scrolling
     const allowedValues = [2, 4, 8, 16, 32, 64, 128, 256];
@@ -27,6 +28,7 @@ function Main({ showAboutModal, onCloseModal }) {
         setPreviewImage(previewUrl);
         setCompressedImage(null);
         setMetrics(null);
+        setErrorMessage(null);
 
         // Scroll to the bottom
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -40,6 +42,14 @@ function Main({ showAboutModal, onCloseModal }) {
         setLoading(false);
     }
 
+    const setError = (errorData) => {
+        setErrorMessage(errorData.error || "An unknown error occurred");
+        setImage(null);
+        setPreviewImage(null);
+        setCompressedImage(null);
+        setLoading(false);
+    }
+
     const getImage = async(file, colors) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -50,7 +60,13 @@ function Main({ showAboutModal, onCloseModal }) {
                 method: "POST",
                 body: formData,
             });
-            console.log(response);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData);
+                return;
+            }
+
             const data = await response.json();
             if (data.compressed_image) {
                 const base64String = data.compressed_image.split(",")[1]; // Remove "data:image/png;base64,"
@@ -60,6 +76,7 @@ function Main({ showAboutModal, onCloseModal }) {
                 const size_reduction = (original_size - compressed_size) / original_size * 100;
 
                 setCompressedImage(data.compressed_image);
+                setErrorMessage(null);
                 data.metrics = {
                     ...data.metrics,
                     "original_size": original_size.toFixed(2),
@@ -70,7 +87,7 @@ function Main({ showAboutModal, onCloseModal }) {
                 setCentroids(data.centroids);
             }
         } catch (error) {
-            console.error("Error uploading image:", error);
+            setError(error);
         }
     }
 
@@ -138,6 +155,12 @@ function Main({ showAboutModal, onCloseModal }) {
                 />
             </div>
 
+            {errorMessage && (
+                <div ref={bottomRef} className="error-message">
+                    <p>{errorMessage}</p>
+                </div>
+            )}
+
             {
                 previewImage ? (
                     <div className="image-container">
@@ -162,7 +185,7 @@ function Main({ showAboutModal, onCloseModal }) {
             }
 
             {
-                    <div ref={bottomRef} className="button-container">
+                    <div ref={!errorMessage ? bottomRef : null} className="button-container">
                         <button className="button"
                             style={!compressedImage ? {opacity: "0"} : null}
                             onClick={

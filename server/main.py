@@ -1,8 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from PIL import Image
-import numpy as np
+from PIL import Image, UnidentifiedImageError
 import io
 import base64
 from Model import Model
@@ -34,8 +33,16 @@ async def uploadImage(file: UploadFile = File(...), colors: int = Form(8)):
     try:
         # Read uploaded file
         image_data = await file.read()
-        # Convert image bytes to a PIL Image
-        original_image = Image.open(io.BytesIO(image_data))
+        
+        try:
+            # Convert image bytes to a PIL Image
+            original_image = Image.open(io.BytesIO(image_data))
+            print(f"Image format: {original_image.format}")
+        except UnidentifiedImageError:
+            return JSONResponse(
+                {"error": "Uploaded file is not a valid image. Please upload a file in a supported format (e.g., PNG, JPG)."},
+                status_code=400,
+            )
         
         # Ensure image is in RGB mode
         # Convert all images to RGB (handle different modes)
