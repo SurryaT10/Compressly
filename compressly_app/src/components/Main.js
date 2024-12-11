@@ -18,9 +18,17 @@ function Main({ showAboutModal, onCloseModal }) {
 
     const bottomRef = useRef(null); // Ref for scrolling
     const allowedValues = [2, 4, 8, 16, 32, 64, 128, 256];
+    const MAX_FILE_SIZE_MB = 2;
 
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
+
+        // Check file size
+        if (file.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
+            setErrorMessage(`File is too large. Please upload an image smaller than ${MAX_FILE_SIZE_MB}MB.`);
+            
+            return;
+        }
 
         setImage(file);
 
