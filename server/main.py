@@ -12,6 +12,7 @@ app = FastAPI()
 # List of allowed origins
 origins = [
     "https://compressly-frontend.onrender.com",  # Your frontend domain
+    "http://localhost:3000"
 ]
 
 # Allow CORS for React Frontend

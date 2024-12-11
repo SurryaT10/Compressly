@@ -9,7 +9,7 @@
 
 .container {
     height: 250px;
-    width: 700px;
+    width: 50%;
     background-color: rgba(110,153,244,255);
     margin-top: 3em;
 
@@ -25,7 +25,7 @@
 
 #file-input-label {
     background-color: rgba(248,250,252,255);
-    padding: 1em 3em;
+    padding: 1rem 3rem;
     border-radius: 0.5em;
     cursor: pointer;
 
@@ -117,4 +117,26 @@
     width: 300px;
     margin-left: 0.5em;
     cursor: pointer;
+}
+
+@media only screen and (max-width: 600px) {
+
+    .container {
+        background-color: white;
+    }
+
+    #file-input-label {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .image-container {
+        display: block;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    #color-slider {
+        width: 20%;
+    }
 }
