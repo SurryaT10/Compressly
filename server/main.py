@@ -12,6 +12,7 @@ app = FastAPI()
 # List of allowed origins
 origins = [
     "https://compressly-frontend.onrender.com",  # Your frontend domain
+    "http://localhost:3000"
 ]
 
 # Allow CORS for React Frontend
@@ -44,7 +45,7 @@ async def uploadImage(file: UploadFile = File(...), colors: int = Form(8)):
             original_image = original_image.convert("RGB")
         
         model = Model(colors)
-        compressed_image, centroids = model.generateCompressedImage(np.array(original_image))
+        compressed_image, centroids = model.generateCompressedImage(original_image)
                 
         # Convert NumPy array to a PIL Image
         new_image = Image.fromarray(compressed_image)
