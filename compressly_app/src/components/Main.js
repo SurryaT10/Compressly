@@ -3,10 +3,11 @@ import { motion } from "framer-motion";
 import Comparison from "./Comparison";
 import About from "./About";
 import Modal from "./Modal";
+import Slider from "./Slider";
 import "../css/main.css";
 import { FaRegImage } from "react-icons/fa6";
 
-function Main({ showAboutModal, onCloseModal }) {
+function Main({ onCloseModal }) {
     const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [compressedImage, setCompressedImage] = useState(null);
@@ -46,10 +47,9 @@ function Main({ showAboutModal, onCloseModal }) {
         setMetrics(null);
         setErrorMessage(null);
 
+        await getCompressedImage(file, allowedValues[colorCountIndex]);
         // Scroll to the bottom
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-
-        await getCompressedImage(file, allowedValues[colorCountIndex]);
     };
 
     const getCompressedImage = async (file, colors) => {
@@ -155,6 +155,15 @@ function Main({ showAboutModal, onCloseModal }) {
                 </div>
             </motion.div>
 
+            <Slider image={image} 
+                allowedValues={allowedValues} 
+                setCompressedImage={setCompressedImage} 
+                colorCountIndex={colorCountIndex} 
+                setColorCountIndex={setColorCountIndex}
+                getImage={getImage} 
+                loading={loading}
+            />
+
             {errorMessage && (
                 <motion.div
                     className="error-message"
@@ -183,16 +192,15 @@ function Main({ showAboutModal, onCloseModal }) {
                     </div>
 
                     <div className="image-container">
-                        <h3>Compressed Image</h3>
-                        {loading ? (
-                            <div className="loader"></div>
-                        ) : (
-                            <motion.img
-                                src={compressedImage}
-                                alt="Compressed"
-                                whileHover={{ scale: 1.05 }}
-                            />
-                        )}
+                        { compressedImage ? <h3>Compressed Image</h3> : null }
+                        {
+                            compressedImage ? (
+                                <img className="preview-image" src={compressedImage} alt="original-image" />
+                            ) : <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                    <div className="loader"></div>
+                                    <p>Compressing...</p>
+                                </div>
+                        }
                     </div>
                 </motion.div>
             )}
@@ -204,8 +212,9 @@ function Main({ showAboutModal, onCloseModal }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
+                    ref={bottomRef}
                 >
-                    <button onClick={(event) => {
+                    <button  onClick={(event) => {
                         event.stopPropagation()
                         showModal(true)}
                         } 
