@@ -1,15 +1,17 @@
-import { useState, useRef } from 'react';
-import Comparison from './Comparison';
-import Modal from './Modal';
-import About from './About';
+import React, { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import Comparison from "./Comparison";
+import About from "./About";
+import Modal from "./Modal";
+import "../css/main.css";
 import { FaRegImage } from "react-icons/fa6";
-import '../css/main.css';
 
 function Main({ showAboutModal, onCloseModal }) {
     const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [compressedImage, setCompressedImage] = useState(null);
     const [metrics, setMetrics] = useState(null);
+    const [aboutModal, setAboutModal] = useState(false);
     const [modal, showModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [colorCountIndex, setColorCountIndex] = useState(2);
@@ -20,8 +22,14 @@ function Main({ showAboutModal, onCloseModal }) {
     const allowedValues = [2, 4, 8, 16, 32, 64, 128, 256];
     const MAX_FILE_SIZE_MB = 2;
 
-    const handleFileChange = async (event) => {
+    const handleFileUpload = async (event) => {
         const file = event.target.files[0];
+
+        if (!file) {
+            setErrorMessage('Error uploading file.');
+            
+            return;
+        }
 
         // Check file size
         if (file.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
@@ -47,14 +55,6 @@ function Main({ showAboutModal, onCloseModal }) {
     const getCompressedImage = async (file, colors) => {
         setLoading(true);
         await getImage(file, colors);
-        setLoading(false);
-    }
-
-    const setError = (errorData) => {
-        setErrorMessage(errorData.error || "An unknown error occurred");
-        setImage(null);
-        setPreviewImage(null);
-        setCompressedImage(null);
         setLoading(false);
     }
 
@@ -85,6 +85,8 @@ function Main({ showAboutModal, onCloseModal }) {
 
                 setCompressedImage(data.compressed_image);
                 setErrorMessage(null);
+
+                console.log(data);
                 data.metrics = {
                     ...data.metrics,
                     "original_size": original_size.toFixed(2),
@@ -99,130 +101,135 @@ function Main({ showAboutModal, onCloseModal }) {
         }
     }
 
+    const setError = (errorData) => {
+        setErrorMessage(errorData.error || "An unknown error occurred");
+        setImage(null);
+        setPreviewImage(null);
+        setCompressedImage(null);
+        setLoading(false);
+    }
+
     const downloadCompressedImage = () => {
         if (!compressedImage) return;
-
-        // Extract base64 content
-        const base64Data = compressedImage.split(",")[1];
-        const byteCharacters = atob(base64Data); // Decode base64 string
-        const byteNumbers = new Array(byteCharacters.length).map((_, i) => byteCharacters.charCodeAt(i));
-        const byteArray = new Uint8Array(byteNumbers);
-
-        // Create Blob and Object URL
-        const blob = new Blob([byteArray], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-
-        // Create a temporary anchor and trigger download
         const a = document.createElement("a");
-        a.href = url;
+        a.href = compressedImage;
         a.download = "compressed_image.png";
         a.click();
-
-        // Revoke the object URL after download
-        URL.revokeObjectURL(url);
     };
 
     return (
-        <div  onClick={() => {
-            showModal(false);
-            onCloseModal();
-        }} className="main">
-            <h1 style={{marginTop:"1em"}}>Image Compresser</h1>
-            <div className="container">
-                <input type="file" id="file-input" onChange={handleFileChange} />
-                <label 
-                    id="file-input-label" 
-                    htmlFor="file-input"
-                    style={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}
-                ><FaRegImage style={{marginRight:"2px"}} />Select Image</label>
-            </div>
+        <div onClick={() => {
+                showModal(false);
+                onCloseModal();
+            }}
+            className="compressly"
+        >
+            {/* Header Section */}
+            <motion.div
+                className="header"
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+                <h1>Compressly</h1>
+                <button className="about-btn" onClick={() => setAboutModal(true)}>
+                    About
+                </button>
+            </motion.div>
 
-            <div className="slider-container">
-                <label htmlFor="color-slider">Number of Colors: {allowedValues[colorCountIndex]}</label>
-                <input 
-                    id="color-slider" 
-                    type="range" 
-                    min="0" 
-                    max={allowedValues.length - 1} 
-                    step="1" 
-                    value={colorCountIndex} 
-                    onChange={(e) => setColorCountIndex(parseInt(e.target.value, 10))}
-                    onMouseUp={async () => { 
-                        if (image) {
-                            setCompressedImage(null);
-                            await getImage(image, allowedValues[colorCountIndex]);
-                        }
-                    }}
-                    onTouchEnd={async () => { 
-                        if (image) {
-                            setCompressedImage(null);
-                            await getImage(image, allowedValues[colorCountIndex]);
-                        }
-                    }}
-                    disabled={loading} 
-                />
-            </div>
+            {/* Upload Section */}
+            <motion.div
+                className="upload-section"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+            >
+                <div className="upload-zone">
+                    <FaRegImage size={50} />
+                    <p>Drag and drop your image here, or click to upload.</p>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                    />
+                </div>
+            </motion.div>
 
             {errorMessage && (
-                <div ref={bottomRef} className="error-message">
-                    <p>{errorMessage}</p>
-                </div>
+                <motion.div
+                    className="error-message"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                >
+                    {errorMessage}
+                </motion.div>
             )}
 
-            {
-                previewImage ? (
+            {/* Display Images */}
+            {previewImage && (
+                <motion.div
+                    className="image-section"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
+                >
                     <div className="image-container">
-                        <div className="preview-container">
-                            <h3>Original Image</h3>
-                            <img className="preview-image" src={previewImage} alt="original-image" />
-                        </div>
-
-                        <div className="preview-container">
-                            { compressedImage ? <h3>Compressed Image</h3> : null }
-                            {
-                                compressedImage ? (
-                                    <img className="preview-image" src={compressedImage} alt="original-image" />
-                                ) : <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <div className="loader"></div>
-                                        <p>Compressing...</p>
-                                    </div>
-                            }
-                        </div>
+                        <h3>Original Image</h3>
+                        <motion.img
+                            src={previewImage}
+                            alt="Original"
+                            whileHover={{ scale: 1.05 }}
+                        />
                     </div>
-                ) : null
-            }
 
-            {
-                    <div ref={!errorMessage ? bottomRef : null} className="button-container">
-                        <button className="button"
-                            style={!compressedImage ? {opacity: "0"} : null}
-                            onClick={
-                                (event) => {
-                                    event.stopPropagation(); // Prevent event from bubbling to parent
-                                    showModal(true)
-                                }
-                            }>
-                            Compare
-                        </button>
-                        <button className="button"
-                            style={!compressedImage ? {opacity: "0"} : null}
-                            onClick={downloadCompressedImage}>
-                            Download
-                        </button>
+                    <div className="image-container">
+                        <h3>Compressed Image</h3>
+                        {loading ? (
+                            <div className="loader"></div>
+                        ) : (
+                            <motion.img
+                                src={compressedImage}
+                                alt="Compressed"
+                                whileHover={{ scale: 1.05 }}
+                            />
+                        )}
                     </div>
-            }
+                </motion.div>
+            )}
 
-            { modal && metrics ? 
-                <Modal>
-                    <Comparison centroids={centroids} metrics={metrics} />
-                </Modal> : null
-            }
+            {/* Buttons */}
+            {compressedImage && (
+                <motion.div
+                    className="button-section"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <button onClick={(event) => {
+                        event.stopPropagation()
+                        showModal(true)}
+                        } 
+                        className="compare-btn">
+                        Compare
+                    </button>
+                    <button className="download-btn" onClick={downloadCompressedImage}>
+                        Download
+                    </button>
 
-            { showAboutModal ? 
+                    { modal && metrics ? 
+                        <Modal>
+                            <Comparison centroids={centroids} metrics={metrics} />
+                        </Modal> : null
+                    }
+                </motion.div>
+            )}
+
+            {/* About Modal */}
+            {aboutModal && (
                 <Modal>
-                    <About />
-                </Modal> : null
-            }
+                    <About onClose={() => setAboutModal(false)} />
+                </Modal>
+            )}
         </div>
     );
 }

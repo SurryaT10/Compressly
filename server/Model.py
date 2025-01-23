@@ -37,7 +37,7 @@ class Model:
         # Upscale the compressed image back to original size
         compressed_image = Image.fromarray(compressed_image).resize((image.width, image.height), Image.NEAREST)
 
-        return np.array(compressed_image), mean_colors
+        return np.array(compressed_image), (mean_colors * 255).astype(np.uint8)
     
     def calculate_metrics(self, original_image, compressed_image):
         # Count unique colors
